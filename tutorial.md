@@ -1,0 +1,1 @@
+Goal: This tutorial demonstrates how to build a complete ELT pipeline in Microsoft Fabric. We will use a Data Pipeline to ingest raw data into a Fabric Lakehouse, then use a Fabric Apache Airflow job to orchestrate a dbt project to transform the data, making it ready for consumption.
