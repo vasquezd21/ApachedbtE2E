@@ -27,22 +27,61 @@ Building upon Demo 1, where we ingested raw sales data into our Lakehouse, we no
     *   Create a new **Apache Airflow job** item. Give it a descriptive name (e.g., `SalesDemoAirflowJob`). This item provides the computing environment and file storage where your dbt project will live and run.
     *   Once the Airflow job item is created, click on it to open its environment page.
     *   Wait for the Airflow environment to start up. This may take a few minutes. The status will change from "Starting" to "Running".
-
-2.  **Access the Airflow Cloud IDE:**
-    *   On the Apache Airflow job environment page (once the status is "Running"), click the **Open Airflow IDE** button. This will open a browser-based code editor connected to the file storage of your Airflow job.
+2.  **Set Up dbt requirments**
+    *   Click 'New DAG File'
+    *   Name the file requirements.txt
+    *   add the following dependencies
+      ```bash
+    astronomer-cosmos==1.0.3
+    dbt-fabric==1.5.0
+    ```
+    *   The dependencies will be automatically installed when the environment restarts or when referenced by DAGs 
 
 3.  **Initialize a dbt Project:**
-    *   In the Airflow IDE, open the terminal (usually found under a `Terminal` menu option, select `New Terminal`).
-    *   Navigate into the `dags` folder. While not strictly required, placing your dbt project within or alongside your `dags` folder in the Airflow job's storage is a common practice.
+    *   Since the current Fabric Apache Airflow interface primarily works with DAG files, we'll create the dbt project structure using a setup DAG that will create the necessary files and folders.
+
+
+    *   Create dbt setup DAG
+    *   Click "New DAG file"
+    *   Name it setup_dbt_project.py
+    *   Replace the boilerplate with the following code:
+
+
+
 
     ```bash
-    cd dags
-    ```
-
-    *   Run the dbt initialization command. We'll name our project `sales_dbt_transforms`.
-
-    ```bash
-    dbt init sales_dbt_transforms
+    from airflow import DAG
+   from airflow.operators.bash import BashOperator
+   from datetime import datetime, timedelta
+   
+   default_args = {
+       'owner': 'data-team',
+       'depends_on_past': False,
+       'email_on_failure': False,
+       'email_on_retry': False,
+       'retries': 1,
+       'retry_delay': timedelta(minutes=5),
+   }
+   
+   with DAG(
+       'setup_dbt_project',
+       default_args=default_args,
+       description='Setup dbt project structure',
+       schedule_interval=None,  # Manual trigger only
+       start_date=datetime(2024, 1, 1),
+       catchup=False,
+       tags=['dbt', 'setup'],
+   ) as dag:
+   
+       setup_task = BashOperator(
+           task_id='create_dbt_structure',
+           bash_command="""
+           cd /opt/airflow/dags
+           mkdir -p dbt_project
+           cd dbt_project
+           dbt init my_dbt_project --skip-profile-setup || echo "dbt init completed"
+           """,
+       )
     ```
 
     *   Follow the prompts:
@@ -50,7 +89,7 @@ Building upon Demo 1, where we ingested raw sales data into our Lakehouse, we no
         *   Choose a database: Select `fabric` from the list.
     *   dbt will create a new folder named `sales_dbt_transforms` with the standard dbt project structure (`models`, `tests`, `macros`, `dbt_project.yml`, etc.).
 
-4.  **Configure the dbt Profile (`profiles.yml`):**
+5.  **Configure the dbt Profile (`profiles.yml`):**
     *   dbt needs to know how to connect to your Fabric Lakehouse's SQL analytics endpoint to read the `raw_sales` data and write the transformed data. This connection information is stored in a `profiles.yml` file.
     *   In the Airflow IDE, navigate to the root of the `sales_dbt_transforms` folder you just created (`dags/sales_dbt_transforms`).
     *   Create a new file here named `profiles.yml`.
@@ -83,14 +122,14 @@ Building upon Demo 1, where we ingested raw sales data into our Lakehouse, we no
     *   **Finding Connection Details:** Go back to your `SalesDemoLakehouse` in the Fabric portal. Click the **SQL analytics endpoint** button. Copy the hostname part of the connection string displayed. Use the exact name of your Lakehouse.
     *   Save the `profiles.yml` file in the Airflow IDE.
 
-5.  **Configure the dbt Project File (`dbt_project.yml`):**
+6.  **Configure the dbt Project File (`dbt_project.yml`):**
     *   In the Airflow IDE, open the `dbt_project.yml` file located within your `sales_dbt_transforms` folder (`dags/sales_dbt_transforms/dbt_project.yml`).
     *   Ensure the `name:` field at the top is set to `sales_dbt_transforms` (matching your folder and profile name).
     *   Verify that the `profile:` field below it also exactly matches the profile name you used in `profiles.yml` (`sales_dbt_transforms`).
     *   Ensure `model-paths` and `test-paths` are correctly pointing to the default `models` and `tests` folders within your project.
     *   Save the `dbt_project.yml` file.
 
-6.  **Test dbt Connection (Crucial):**
+7.  **Test dbt Connection (Crucial):**
     *   In the Airflow IDE terminal, navigate to the root of your dbt project folder:
 
     ```bash
@@ -107,7 +146,7 @@ Building upon Demo 1, where we ingested raw sales data into our Lakehouse, we no
     *   Look for `Connection test: OK` in the output. If you see this, your dbt project can successfully connect to your Lakehouse.
     *   If the connection test fails, carefully review your `profiles.yml` file for typos in the `host`, `database`, or authentication section. Ensure the Lakehouse name and SQL endpoint host are exactly correct.
 
-7.  **Develop a dbt Model:**
+8.  **Develop a dbt Model:**
     *   Now, let's create a simple dbt model to transform the data.
     *   In the Airflow IDE, navigate to the `models` folder within your dbt project (`dags/sales_dbt_transforms/models`).
     *   Delete the example `my_first_model.sql` and `my_second_model.sql` files.
@@ -130,7 +169,7 @@ Building upon Demo 1, where we ingested raw sales data into our Lakehouse, we no
     ```
     *   Save the `fct_sales.sql` file.
 
-8.  **Define the Source Table:**
+9.  **Define the Source Table:**
     *   To use `{{ source('SalesDemoLakehouse', 'raw_sales') }}` in your dbt models, you need to tell dbt about your source tables in the Lakehouse using a YAML file.
     *   In the Airflow IDE, navigate to the `models` folder within your dbt project (`dags/sales_dbt_transforms/models`).
     *   Create a new file named `sources.yml`.
@@ -150,7 +189,7 @@ Building upon Demo 1, where we ingested raw sales data into our Lakehouse, we no
     ```
     *   Save the `sources.yml` file.
 
-9.  **Run the dbt Model:**
+10.  **Run the dbt Model:**
     *   Now we can run the dbt model to create the transformed table in the Lakehouse.
     *   In the Airflow IDE terminal, ensure you are in the root of your dbt project folder (`dags/sales_dbt_transforms`).
     *   Run the dbt run command:
@@ -162,7 +201,7 @@ Building upon Demo 1, where we ingested raw sales data into our Lakehouse, we no
     *   dbt will compile your `fct_sales.sql` model, identify the source (`raw_sales`), and execute the compiled SQL against your Fabric Lakehouse.
     *   Look at the output in the terminal. You should see dbt connecting to the database and running the `fct_sales` model. It should report "SUCCESS" when finished.
 
-10. **Verify Transformed Data in the Lakehouse:**
+11. **Verify Transformed Data in the Lakehouse:**
     *   Navigate back to your Fabric workspace portal.
     *   Go to your `SalesDemoLakehouse`.
     *   In the Lakehouse explorer, expand the **Tables** section.
