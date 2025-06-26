@@ -52,24 +52,19 @@ Let's walk through the steps to ingest the data using a Data Pipeline:
 5.  **Configure the Copy Data Activity - Source:**
     *   Select the `CopyCsvToSalesTable` activity in the canvas.
     *   Go to the **Source** tab in the properties pane below.
-    *   For "Data store type", select `Workspace`.
-    *   For "Workspace data store", select **Lakehouse**.
-    *   Choose your `SalesDemoLakehouse` from the dropdown.
-    *   For "File path type", select `File path in Lakehouse`.
-    *   Browse and select the `uploads/sales.csv` file you uploaded in Step 3.
-    *   Under "File format settings", ensure **Binary format** is unchecked.
+    *   For "Connection", select `SalesDemoLakehouse`.
+    *   For "Root Folder", select **Files**.
+    *   For "File path", browse and select the `uploads/sales.csv` file you uploaded in Step 3.
     *   Set the "File format" to `Delimited text`.
-    *   Review the "File format settings" for `Delimited text`. Ensure "First row as header" is checked and the column delimiter (comma) is correct. Use the "Preview data" button to verify the data looks correctly parsed.
+
 
 6.  **Configure the Copy Data Activity - Destination:**
     *   Go to the **Destination** tab.
     *   For "Data store type", select `Workspace`.
-    *   For "Workspace data store", select **Lakehouse**.
-    *   Choose your `SalesDemoLakehouse`.
-    *   For "Root folder", select `Tables` (this is where we will load the data as a managed table).
-    *   For "Table setting", select `Auto create table`.
+    *   Click on the "Connection", Choose your `SalesDemoLakehouse`.
+    *   For "Table", select `New`.
     *   For "Table name", enter `raw_sales`. This will be the name of the Delta table created in your Lakehouse.
-    *   For "File format", select `Delta`.
+    *   For "Table Action", select `Append` to append values to the table we just created.
     *   For "Copy behavior", select `None` (since it's a small static file, no need for upsert/merge).
 
 7.  **Run the Data Pipeline:**
