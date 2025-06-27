@@ -237,18 +237,3 @@ Before running, you must update these placeholder values in `profiles.yml`:
    - `fct_sales` (transformed sales data)
    - `sales_summary` (daily aggregated data)
 
-## Why My Original Version Was Different:
-
-I initially tried to "improve" on Microsoft's approach by:
-- Using MSI authentication (simpler but not officially supported)
-- Adding more complex configurations
-- Using newer package versions
-
-However, **Microsoft's official approach is the tested and supported method**. The key differences in Microsoft's approach:
-
-1. **Service Principal Authentication**: More secure and officially supported
-2. **Simpler Structure**: Follows dbt conventions exactly
-3. **Stable Versions**: Uses tested package versions
-4. **Clear Separation**: Keeps configuration simple and focused
-
-This corrected version now matches Microsoft's official documentation and should work reliably in your Fabric environment.
