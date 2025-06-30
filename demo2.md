@@ -71,9 +71,9 @@ sales:
       type: fabricspark
       method: livy
       authentication: ServicePrincipal
-      endpoint: https://api.fabric.microsoft.com/v1
+      endpoint: <YOUR_LAKEHOUSE_SQL_ENDPOINT>
       workspaceid: <Workspace ID>
-      lakehouseid: <Lakhouse ID>
+      lakehouseid: <YOUR_LAKEHOUSE_NAME>
       lakehouse: <Lakehouse name>
       schema: <Schema name>
       spark_config:
