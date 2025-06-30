@@ -56,7 +56,6 @@ dags/
 │   ├── profiles.yml
 │   ├── dbt_project.yml
 │   └── models/
-│       ├── fct_sales.sql
 │       └── sales_summary.sql
 └── sales_cosmos_dag.py
 ```
@@ -118,39 +117,8 @@ models:
     materialized: table
 ```
 
-### 6. Create Your First dbt Model:
-**File: `dags/sales_dbt_project/models/fct_sales.sql`**
 
-```sql
--- Transform raw sales data with calculated fields
-with sales_data as (
-    select * from raw_sales
-),
-
-final as (
-    SELECT
-        sale_id,
-        product,
-        quantity,
-        price_per_unit,
-        sale_timestamp,
-        -- Calculate the total amount for each sale item
-        quantity * price_per_unit AS total_amount,
-        -- Add sale category based on amount
-        CASE 
-            WHEN quantity * price_per_unit >= 1000 THEN 'High Value'
-            WHEN quantity * price_per_unit >= 100 THEN 'Medium Value'
-            ELSE 'Low Value'
-        END AS sale_category,
-        -- Extract date for analysis
-        CAST(sale_timestamp AS DATE) AS sale_date
-    FROM sales_data
-)
-
-select * from final
-```
-
-### 7. Create a Summary Model:
+### 6. Create a Summary Model:
 **File: `dags/sales_dbt_project/models/sales_summary.sql`**
 
 ```sql
@@ -234,6 +202,5 @@ Before running, you must update these placeholder values in `profiles.yml`:
 1. Monitor the DAG execution in Airflow UI
 2. Once successful, go back to your Fabric Lakehouse
 3. Check the Tables section for new tables:
-   - `fct_sales` (transformed sales data)
    - `sales_summary` (daily aggregated data)
 
