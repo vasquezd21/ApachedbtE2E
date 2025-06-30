@@ -64,24 +64,38 @@ dags/
 **File: `dags/sales_dbt_project/profiles.yml`**
 
 ```yaml
-config:
-  partial_parse: true
-
-sales_dbt_project:
-  target: fabric-dev
+sales:
+  target: dev
   outputs:
-    fabric-dev:
-      type: fabric
-      driver: "ODBC Driver 18 for SQL Server"
-      server: <YOUR_LAKEHOUSE_SQL_ENDPOINT>  # Replace with your Lakehouse SQL endpoint
-      port: 1433
-      database: "<YOUR_LAKEHOUSE_NAME>"      # Replace with your Lakehouse name (e.g., SalesDemoLakehouse)
-      schema: dbo
-      threads: 4
-      authentication: ServicePrincipal
-      tenant_id: <YOUR_TENANT_ID>            # Replace with your Azure tenant ID
-      client_id: <YOUR_CLIENT_ID>            # Replace with your Service Principal client ID
-      client_secret: <YOUR_CLIENT_SECRET>    # Replace with your Service Principal client secret
+    dev:
+      type: fabricspark
+      method: livy
+      authentication: CLI
+      endpoint: https://api.fabric.microsoft.com/v1
+      workspaceid: 8376f544-263c-4963-a803-d2f9432f8502
+      lakehouseid: x6eps4xrq2xudenlfv6naeo3i4-76miaq2onltexmjurmbwfv66g4.msit-datawarehouse.fabric.microsoft.com
+      lakehouse: SalesDemoLakehouse
+      schema: SalesDemoLakehouse
+      spark_config:
+        name: sales_demo
+        # optional
+        archives:
+          - "example-archive.zip"
+        conf:
+            spark.executor.memory: "2g"
+            spark.executor.cores: "2"
+        tags:
+          project: salesDemo
+          user: v-davasquez@microsoft.com
+          driverMemory: "2g"
+          driverCores: 2
+          executorMemory: "4g"
+          executorCores: 4
+          numExecutors: 3
+      # optional
+      connect_retries: 0
+      connect_timeout: 10
+      retry_all: true
 ```
 
 **To find your Lakehouse SQL endpoint:**
@@ -93,18 +107,20 @@ sales_dbt_project:
 **File: `dags/sales_dbt_project/dbt_project.yml`**
 
 ```yaml
-name: "sales_dbt_project"
+name: "sales"
+
 config-version: 2
 version: "0.1"
-profile: "sales_dbt_project"
+
+profile: "sales"
 
 model-paths: ["models"]
 seed-paths: ["seeds"]
 test-paths: ["tests"]
 analysis-paths: ["analysis"]
 macro-paths: ["macros"]
-target-path: "target"
 
+target-path: "target"
 clean-targets:
   - "target"
   - "dbt_modules"
@@ -113,7 +129,7 @@ clean-targets:
 require-dbt-version: [">=1.0.0", "<2.0.0"]
 
 models:
-  sales_dbt_project:
+  sales:
     materialized: table
 ```
 
@@ -123,23 +139,18 @@ models:
 
 ```sql
 -- Daily sales summary based on the fact table
-with daily_sales as (
-    select * from {{ ref('fct_sales') }}
-),
 
-final as (
-    SELECT
-        sale_date,
-        COUNT(*) as total_transactions,
-        SUM(total_amount) as daily_revenue,
-        AVG(total_amount) as avg_transaction_value,
-        COUNT(DISTINCT product) as unique_products_sold
-    FROM daily_sales
-    GROUP BY sale_date
-    ORDER BY sale_date
-)
-
-select * from final
+SELECT
+    sale_date,
+    COUNT(*) as total_transactions,
+    SUM(total_amount) as daily_revenue,
+    AVG(total_amount) as avg_transaction_value,
+    MIN(total_amount) as min_transaction_value,
+    MAX(total_amount) as max_transaction_value,
+    COUNT(DISTINCT product) as unique_products_sold
+FROM {{ ref('fct_sales') }}
+GROUP BY sale_date
+ORDER BY sale_date
 ```
 
 ### 7. Create the Airflow DAG:
@@ -149,37 +160,31 @@ select * from final
 import os
 from pathlib import Path
 from datetime import datetime
-
+from airflow.utils.dates import days_ago
 from cosmos import DbtDag, ProjectConfig, ProfileConfig
+from airflow import DAG
 
-# Define the path to your dbt project
-DEFAULT_DBT_ROOT_PATH = Path(__file__).parent / "sales_dbt_project"
+DEFAULT_DBT_ROOT_PATH = Path(__file__).parent.parent / "dags" / "sales"
 DBT_ROOT_PATH = Path(os.getenv("DBT_ROOT_PATH", DEFAULT_DBT_ROOT_PATH))
 
-# Profile configuration
 profile_config = ProfileConfig(
-    profile_name="sales_dbt_project",
+    profile_name="sales",
     target_name="fabric-dev",
     profiles_yml_filepath=DBT_ROOT_PATH / "profiles.yml",
 )
 
-# Create the dbt DAG using Cosmos
-sales_dbt_dag = DbtDag(
-    project_config=ProjectConfig(DBT_ROOT_PATH),
-    operator_args={"install_deps": True},
-    profile_config=profile_config,
+with DAG(
+    dag_id="dbt_fabric_dag",
     schedule_interval="@daily",
-    start_date=datetime(2024, 1, 1),
+    start_date=days_ago(1),
     catchup=False,
-    dag_id="sales_dbt_dag",
-    default_args={
-        'owner': 'data-team',
-        'depends_on_past': False,
-        'email_on_failure': False,
-        'email_on_retry': False,
-        'retries': 1,
-    },
-)
+) as dag:
+    dbt_fabric_dag = DbtDag(
+        project_config=ProjectConfig(DBT_ROOT_PATH),
+        operator_args={"install_deps": True},
+        profile_config=profile_config,
+    )
+
 ```
 
 ### 8. Update Configuration Values:
