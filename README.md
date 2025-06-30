@@ -4,7 +4,6 @@ This repository contains a series of interconnected demos showcasing how to buil
 
 *   **Fabric Data Pipelines** for data ingestion.
 *   **dbt (Data Build Tool)** for data transformation.
-*   *(Planned)* **Fabric Apache Airflow jobs** for orchestration.
 
 This demo series directly addresses the request to set up demos combining Apache Airflow job + dbt within Microsoft Fabric, by breaking down the end-to-end process into manageable and understandable steps.
 
@@ -17,12 +16,10 @@ To make the process clear and easy to follow, the end-to-end ELT pipeline is bro
     *   **Status:** **Complete**. The step-by-step guide is available in `demo1.md`.
 
 2.  **Demo 2: dbt Transformation within Fabric Airflow Job Environment** (`demo2.md`)
-    *   **Goal:** Shows how to set up a dbt project within the file storage of a Fabric Apache Airflow job, configure it to connect to the Lakehouse data from Demo 1, define a simple dbt model (`fct_sales`), and run the dbt transformation manually from the Airflow IDE terminal to validate the logic.
+    *   **Goal:** Shows how to set up a dbt project within the file storage of a Fabric Apache Airflow job, configure it to connect to the Lakehouse data from Demo 1, define a simple dbt model, and run the dbt transformation manually from the Airflow IDE terminal to validate the logic.
     *   **Status:** **Complete**. The step-by-step guide is available in `demo2.md`.
 
-3.  **Demo 3: Orchestrating dbt Transformations with Fabric Apache Airflow Job** *(Planned)*
-    *   **Goal:** Will demonstrate writing a Python DAG (Directed Acyclic Graph) in the Airflow IDE to automate and schedule the `dbt run` command using an appropriate Airflow operator, connecting the orchestration layer to the transformation logic developed in Demo 2.
-    *   **Status:** **Planned / In Progress**. This is the next step to be documented.
+
 
 ## How to View and Run the Demos
 
