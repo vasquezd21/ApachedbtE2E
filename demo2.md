@@ -174,7 +174,7 @@ profile_config = ProfileConfig(
 )
 
 with DAG(
-    dag_id="dbt_fabric_dag",
+    dag_id="sales_dbt_dag",
     schedule_interval="@daily",
     start_date=days_ago(1),
     catchup=False,
