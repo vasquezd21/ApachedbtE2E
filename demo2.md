@@ -142,7 +142,7 @@ final as (
 select * from final
 ```
 
-### 8. Create the Airflow DAG:
+### 7. Create the Airflow DAG:
 **File: `dags/sales_cosmos_dag.py`**
 
 ```python
@@ -182,7 +182,7 @@ sales_dbt_dag = DbtDag(
 )
 ```
 
-### 9. Update Configuration Values:
+### 8. Update Configuration Values:
 Before running, you must update these placeholder values in `profiles.yml`:
 
 - `<YOUR_LAKEHOUSE_SQL_ENDPOINT>`: Your Lakehouse SQL endpoint (e.g., `abc123-def456.sql.fabric.microsoft.com`)
@@ -191,14 +191,14 @@ Before running, you must update these placeholder values in `profiles.yml`:
 - `<YOUR_CLIENT_ID>`: Your Service Principal application ID
 - `<YOUR_CLIENT_SECRET>`: Your Service Principal client secret
 
-### 10. Deploy and Run:
+### 9. Deploy and Run:
 1. Save all files in your Airflow job interface
 2. Wait for the environment to restart and install dependencies
 3. Navigate to the Airflow UI
 4. Find your DAG named `sales_dbt_dag`
 5. Enable the DAG and trigger a manual run
 
-### 11. Monitor and Verify:
+### 10. Monitor and Verify:
 1. Monitor the DAG execution in Airflow UI
 2. Once successful, go back to your Fabric Lakehouse
 3. Check the Tables section for new tables:
