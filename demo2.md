@@ -52,7 +52,7 @@ Following Microsoft's official pattern, create this folder structure in your `da
 ```
 dags/
 ├── requirements.txt
-├── sales_dbt_project/
+├── sales/
 │   ├── profiles.yml
 │   ├── dbt_project.yml
 │   └── models/
@@ -61,7 +61,7 @@ dags/
 ```
 
 ### 4. Create the dbt Profile Configuration:
-**File: `dags/sales_dbt_project/profiles.yml`**
+**File: `dags/sales/profiles.yml`**
 
 ```yaml
 sales:
@@ -104,7 +104,7 @@ sales:
 - Copy the server name from the connection string
 
 ### 5. Create the dbt Project Configuration:
-**File: `dags/sales_dbt_project/dbt_project.yml`**
+**File: `dags/sales/dbt_project.yml`**
 
 ```yaml
 name: "sales"
@@ -135,7 +135,7 @@ models:
 
 
 ### 6. Create a Summary Model:
-**File: `dags/sales_dbt_project/models/sales_summary.sql`**
+**File: `dags/sales/models/sales_summary.sql`**
 
 ```sql
 -- Daily sales summary based on the fact table
