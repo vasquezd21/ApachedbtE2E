@@ -70,7 +70,7 @@ sales:
     dev:
       type: fabricspark
       method: livy
-      authentication: CLI
+      authentication: ServicePrincipal
       endpoint: https://api.fabric.microsoft.com/v1
       workspaceid: 8376f544-263c-4963-a803-d2f9432f8502
       lakehouseid: x6eps4xrq2xudenlfv6naeo3i4-76miaq2onltexmjurmbwfv66g4.msit-datawarehouse.fabric.microsoft.com
