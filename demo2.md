@@ -72,10 +72,10 @@ sales:
       method: livy
       authentication: ServicePrincipal
       endpoint: https://api.fabric.microsoft.com/v1
-      workspaceid: 8376f544-263c-4963-a803-d2f9432f8502
-      lakehouseid: x6eps4xrq2xudenlfv6naeo3i4-76miaq2onltexmjurmbwfv66g4.msit-datawarehouse.fabric.microsoft.com
-      lakehouse: SalesDemoLakehouse
-      schema: SalesDemoLakehouse
+      workspaceid: <Workspace ID>
+      lakehouseid: <Lakhouse ID>
+      lakehouse: <Lakehouse name>
+      schema: <Schema name>
       spark_config:
         name: sales_demo
         # optional
